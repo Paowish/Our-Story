@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { FaHeart, FaMapMarkerAlt, FaMusic, FaLock, FaDice, FaLockOpen, FaCamera, FaBars, FaTimes, FaExclamationCircle } from 'react-icons/fa';
+import { FaHeart, FaMapMarkerAlt, FaMusic, FaLock, FaDice, FaLockOpen, FaCamera, FaBars, FaTimes, FaExclamationCircle, FaPlay, FaPause, FaComment } from 'react-icons/fa';
 
 // Fix for Leaflet default markers
 delete L.Icon.Default.prototype._getIconUrl;
@@ -16,17 +16,13 @@ L.Icon.Default.mergeOptions({
 // ==========================
 // 1. DATA (Your real details)
 // ==========================
-// ==========================
-// 1. DATA (Multiple Photos)
-// ==========================
 const memories = [
   {
     id: 1,
     title: "The Day We Met",
     desc: "Santolan, Pasig City. The moment our story began.",
-    // Put 2-4 photos here. You can swap these URLs with your real photo paths later.
     images: [
-      "/The day we met 1.jpeg",
+      "/The day we met 1.jpeg", // ✅ Fixed with leading slash
       "/The day we met 2.jpeg"
     ]
   },
@@ -35,9 +31,9 @@ const memories = [
     title: "Our First Date",
     desc: "Bonchon, Pasig Palengke, Pasig City.",
     images: [
-      "Our first date 1.jpeg",
-      "Our first date 2.jpeg",
-      "Our first date 3.jpeg"
+      "/Our first date 1.jpeg", // ✅ Fixed with leading slash
+      "/Our first date 2.jpeg",
+      "/Our first date 3.jpeg"
     ]
   },
   {
@@ -45,10 +41,10 @@ const memories = [
     title: "Our First Trip",
     desc: "Adventures with you are always the best.",
     images: [
-      "Our first trip 1.jpeg",
-      "Our first trip 2.jpeg",
-      "Our first trip 3.jpeg",
-      "Our first trip 4.jpeg"
+      "/Our first trip 1.jpeg", // ✅ Fixed with leading slash
+      "/Our first trip 2.jpeg",
+      "/Our first trip 3.jpeg",
+      "/Our first trip 4.jpeg"
     ]
   },
 ];
@@ -65,7 +61,6 @@ const dateIdeas = [
   "Build a blanket fort 🏕️", "Stargaze at midnight 🌙"
 ];
 
-// ==========================
 // ==========================
 // 2. COMPONENT: ALERT MODAL (FULLY CENTERED)
 // ==========================
@@ -130,6 +125,7 @@ function Navbar({ activeSection, toggleMenu }) {
     { id: 'home', label: 'Home', icon: <FaHeart /> },
     { id: 'memories', label: 'Memories', icon: <FaCamera /> },
     { id: 'map', label: 'Our Map', icon: <FaMapMarkerAlt /> },
+    { id: 'chat', label: 'Chat', icon: <FaComment /> },
     { id: 'diary', label: 'Diary', icon: <FaLock /> },
     { id: 'fun', label: 'Fun', icon: <FaDice /> },
     { id: 'music', label: 'Music', icon: <FaMusic /> },
@@ -179,6 +175,7 @@ function MobileSidebar({ isOpen, onClose, activeSection }) {
     { id: 'home', label: 'Home', icon: <FaHeart /> },
     { id: 'memories', label: 'Memories', icon: <FaCamera /> },
     { id: 'map', label: 'Our Map', icon: <FaMapMarkerAlt /> },
+    { id: 'chat', label: 'Chat', icon: <FaComment /> },
     { id: 'diary', label: 'Diary', icon: <FaLock /> },
     { id: 'fun', label: 'Fun', icon: <FaDice /> },
     { id: 'music', label: 'Music', icon: <FaMusic /> },
@@ -239,7 +236,7 @@ function MobileSidebar({ isOpen, onClose, activeSection }) {
 // ==========================
 function ScrollSpy({ setActiveSection }) {
   useEffect(() => {
-    const sections = ['home', 'memories', 'map', 'diary', 'fun', 'music'];
+    const sections = ['home', 'memories', 'map', 'chat', 'diary', 'fun', 'music'];
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -318,13 +315,32 @@ function Countdown() {
 // 7. MAIN APP
 // ==========================
 function App() {
+  // Force Light Mode
+  useEffect(() => {
+    document.documentElement.classList.remove('dark');
+    document.documentElement.style.colorScheme = 'light';
+  }, []);
+
   const [activeSection, setActiveSection] = useState('home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [diaryPassword, setDiaryPassword] = useState('');
   const [isDiaryUnlocked, setIsDiaryUnlocked] = useState(false);
   const [dateIdea, setDateIdea] = useState("Press the button for inspiration!");
 
-  // 🔹 NEW: Alert Modal State
+  // 🔹 BACKGROUND MUSIC STATE (Auto-Play)
+  const [isPlaying, setIsPlaying] = useState(true);
+  const audioRef = useRef(new Audio("/First And Last.mp3")); // 👈 Ensure this file exists in your 'public' folder
+
+  useEffect(() => {
+    if (isPlaying) {
+      audioRef.current.loop = true;
+      audioRef.current.play().catch(() => setIsPlaying(false));
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  // Alert Modal State
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
@@ -354,6 +370,18 @@ function App() {
       <Navbar activeSection={activeSection} toggleMenu={toggleMenu} />
       <MobileSidebar isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} activeSection={activeSection} />
       <ScrollSpy setActiveSection={setActiveSection} />
+
+      {/* 🔹 FLOATING MUSIC PLAYER (Auto-Plays on load) */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setIsPlaying(!isPlaying)}
+          className="w-14 h-14 bg-pink-500 rounded-full shadow-lg flex items-center justify-center text-white hover:bg-pink-600 transition"
+        >
+          {isPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5 ml-1" />}
+        </motion.button>
+      </div>
 
       <main className="max-w-4xl mx-auto px-6 pb-24 space-y-32">
 
@@ -429,7 +457,52 @@ function App() {
           </motion.div>
         </section>
 
-        {/* ===== SECTION 4: SECRET DIARY ===== */}
+        {/* ===== SECTION 4: CHAT ===== */}
+        <section id="chat" className="scroll-mt-20">
+          <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <h2 className="text-3xl font-serif text-gray-900 mb-8 flex items-center gap-3">
+              <FaComment className="text-pink-500" /> Our First Messages
+            </h2>
+            <div className="bg-gray-50 rounded-2xl border border-gray-100 p-6 shadow-sm max-w-2xl mx-auto">
+              <div className="space-y-4">
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-sm">
+                    <p className="text-gray-700 text-sm">-Jomar</p>
+                    <span className="text-[10px] text-gray-400 mt-1 block">5:49 PM</span>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="bg-pink-100 border border-pink-200 rounded-2xl rounded-tr-none p-4 max-w-[80%] shadow-sm">
+                    <p className="text-gray-700 text-sm">Bakit kuya? 😆
+                    </p>
+                    <span className="text-[10px] text-gray-400 mt-1 block">5:50 PM</span>
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-sm">
+                    <p className="text-gray-700 text-sm">Si jomar po jan ate</p>
+                    <span className="text-[10px] text-gray-400 mt-1 block">5:52 PM</span>
+                  </div>
+                </div>
+
+                <div className="flex justify-start">
+                  <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-[80%] shadow-sm">
+                    <p className="text-gray-700 text-sm">HAHAHAHAHAHHA</p>
+                    <span className="text-[10px] text-gray-400 mt-1 block">5:52 PM</span>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <div className="bg-pink-100 border border-pink-200 rounded-2xl rounded-tr-none p-4 max-w-[80%] shadow-sm">
+                    <p className="text-gray-700 text-sm">Anong 'ate' 😆</p>
+                    <span className="text-[10px] text-gray-400 mt-1 block">5:52 PM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ===== SECTION 5: SECRET DIARY ===== */}
         <section id="diary" className="scroll-mt-20">
           <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h2 className="text-3xl font-serif text-gray-900 mb-8 flex items-center gap-3">
@@ -467,7 +540,7 @@ function App() {
           </motion.div>
         </section>
 
-        {/* ===== SECTION 5: DATE NIGHT PICKER ===== */}
+        {/* ===== SECTION 6: DATE NIGHT PICKER ===== */}
         <section id="fun" className="scroll-mt-20">
           <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h2 className="text-3xl font-serif text-gray-900 mb-8 flex items-center gap-3">
@@ -482,7 +555,7 @@ function App() {
           </motion.div>
         </section>
 
-        {/* ===== SECTION 6: MUSIC ===== */}
+        {/* ===== SECTION 7: MUSIC ===== */}
         <section id="music" className="scroll-mt-20 pb-12">
           <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <h2 className="text-3xl font-serif text-gray-900 mb-8 flex items-center gap-3">
