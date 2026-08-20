@@ -16,10 +16,41 @@ L.Icon.Default.mergeOptions({
 // ==========================
 // 1. DATA (Your real details)
 // ==========================
+// ==========================
+// 1. DATA (Multiple Photos)
+// ==========================
 const memories = [
-  { id: 1, title: "The Day We Met", desc: "Santolan, Pasig City. The moment our story began.", img: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=400" },
-  { id: 2, title: "Our First Date", desc: "Bonchon, Pasig Palengke, Pasig City.", img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400" },
-  { id: 3, title: "Our First Trip", desc: "Adventures with you are always the best.", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400" },
+  {
+    id: 1,
+    title: "The Day We Met",
+    desc: "Santolan, Pasig City. The moment our story began.",
+    // Put 2-4 photos here. You can swap these URLs with your real photo paths later.
+    images: [
+      "/The day we met 1.jpeg",
+      "/The day we met 2.jpeg"
+    ]
+  },
+  {
+    id: 2,
+    title: "Our First Date",
+    desc: "Bonchon, Pasig Palengke, Pasig City.",
+    images: [
+      "Our first date 1.jpeg",
+      "Our first date 2.jpeg",
+      "Our first date 3.jpeg"
+    ]
+  },
+  {
+    id: 3,
+    title: "Our First Trip",
+    desc: "Adventures with you are always the best.",
+    images: [
+      "Our first trip 1.jpeg",
+      "Our first trip 2.jpeg",
+      "Our first trip 3.jpeg",
+      "Our first trip 4.jpeg"
+    ]
+  },
 ];
 
 const locations = [
@@ -36,7 +67,7 @@ const dateIdeas = [
 
 // ==========================
 // ==========================
-// 2. COMPONENT: ALERT MODAL (CENTERED)
+// 2. COMPONENT: ALERT MODAL (FULLY CENTERED)
 // ==========================
 function AlertModal({ isOpen, onClose, message }) {
   return (
@@ -60,28 +91,29 @@ function AlertModal({ isOpen, onClose, message }) {
             transition={{ type: 'spring', damping: 25, stiffness: 400 }}
             className="fixed inset-0 z-[90] flex items-center justify-center p-4"
           >
-            <div className="w-full max-w-md bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 shadow-2xl rounded-2xl p-6 relative">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <FaExclamationCircle className="text-red-500 w-5 h-5" />
+            <div className="w-full max-w-md bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 shadow-2xl rounded-2xl p-6 relative text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mx-auto">
+                  <FaExclamationCircle className="text-red-500 w-6 h-6" />
                 </div>
-                <div className="flex-1">
+                <div>
                   <h3 className="font-semibold text-gray-800 text-lg">Incorrect Password</h3>
                   <p className="text-gray-600 mt-1 text-sm">{message}</p>
-                  <button
-                    onClick={onClose}
-                    className="mt-4 px-6 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition shadow-sm"
-                  >
-                    Try Again
-                  </button>
                 </div>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 transition"
+                  className="mt-2 px-6 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition shadow-sm"
                 >
-                  <FaTimes className="w-5 h-5" />
+                  Try Again
                 </button>
               </div>
+
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+              >
+                <FaTimes className="w-5 h-5" />
+              </button>
             </div>
           </motion.div>
         </>
@@ -305,7 +337,7 @@ function App() {
     if (diaryPassword === '24/24/7') {
       setIsDiaryUnlocked(true);
     } else {
-      setAlertMessage('Wrong password! Try "24/24/7"');
+      setAlertMessage('Mali! Try mo "24/24/7"');
       setIsAlertOpen(true);
     }
   };
@@ -346,10 +378,24 @@ function App() {
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               {memories.map((mem) => (
-                <motion.div key={mem.id} whileHover={{ y: -8 }} className="bg-gray-50 rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-                  <div className="h-48 overflow-hidden">
-                    <img src={mem.img} alt={mem.title} className="w-full h-full object-cover" />
+                <motion.div
+                  key={mem.id}
+                  whileHover={{ y: -8 }}
+                  className="bg-gray-50 rounded-2xl overflow-hidden shadow-sm border border-gray-100"
+                >
+                  {/* Photo Collage / Multiple Images */}
+                  <div className={`grid ${mem.images.length === 2 ? 'grid-cols-2' : mem.images.length === 3 ? 'grid-cols-3' : 'grid-cols-2'} gap-1 h-56`}>
+                    {mem.images.slice(0, 4).map((img, idx) => (
+                      <div key={idx} className="relative w-full h-full overflow-hidden">
+                        <img
+                          src={img}
+                          alt={`${mem.title} ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
                   </div>
+
                   <div className="p-5">
                     <h3 className="font-semibold text-gray-800 text-lg">{mem.title}</h3>
                     <p className="text-gray-500 text-sm mt-1">{mem.desc}</p>
