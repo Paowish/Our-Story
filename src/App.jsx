@@ -337,7 +337,7 @@ function App() {
     if (diaryPassword === '24/24/7') {
       setIsDiaryUnlocked(true);
     } else {
-      setAlertMessage('Mali! Try mo "24/24/7"');
+      setAlertMessage('Secret muna ito for the message hehe');
       setIsAlertOpen(true);
     }
   };
